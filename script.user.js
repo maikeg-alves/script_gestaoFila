@@ -48,11 +48,7 @@ class Logger {
 
 console.log(`[Opa] readyState: ${document.readyState}`);
 
-<<<<<<< HEAD
-console.log("ATUALIZAÇÂO PELO GITHUB 1.0.1");
-=======
 const BASE_URL = "http://localhost:3000";
->>>>>>> dev
 
 const logger = new Logger();
 

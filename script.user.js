@@ -48,7 +48,7 @@ class Logger {
 
 console.log(`[Opa] readyState: ${document.readyState}`);
 
-const BASE_URL = "http://localhost:3000";
+const BASE_URL = "https://f18d-200-107-118-1.ngrok-free.app";
 
 const logger = new Logger();
 

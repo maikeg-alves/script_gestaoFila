@@ -48,7 +48,11 @@ class Logger {
 
 console.log(`[Opa] readyState: ${document.readyState}`);
 
+<<<<<<< HEAD
 console.log("ATUALIZAÇÂO PELO GITHUB 1.0.1");
+=======
+const BASE_URL = "http://localhost:3000";
+>>>>>>> dev
 
 const logger = new Logger();
 
@@ -211,7 +215,7 @@ async function getAtendimentoById(idsAtendimentos, list) {
 
   consultandoAtendimentos = true;
 
-  await fetch(`http://localhost:3000/atendimento/status`, options)
+  await fetch(`${BASE_URL}/atendimento/status`, options)
     .then((response) => response.json())
     .then((alertas) => {
       logger.log("Consulta realizada com sucesso.");

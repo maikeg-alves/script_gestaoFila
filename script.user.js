@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name          Script Gestão de Fila
+// @name         Script Gestão de Fila
 // @namespace    http://tampermonkey.net/
 // @version      1.0.0
 // @description  Script de gestão de filas, opa - via fiber
@@ -8,8 +8,8 @@
 // @icon         data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==
 // @run-at       document-start
 // @grant        none
-// @updateURL    https://raw.githubusercontent.com/maikeg-alves/[repo]/main/script.meta.js
-// @downloadURL  https://github.com/maikeg-alves/[repo]/releases/latest/download/script.user.js
+// @updateURL    https://raw.githubusercontent.com/maikeg-alves/script_gestaoFila/main/script.meta.js
+// @downloadURL  https://github.com/maikeg-alves/script_gestaoFila/releases/latest/download/script.user.js
 // ==/UserScript==
 
 class Logger {

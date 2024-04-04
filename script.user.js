@@ -48,7 +48,7 @@ class Logger {
 
 console.log(`[Opa] readyState: ${document.readyState}`);
 
-console.log("ATUALIZAÇÂO PELO GITHUB");
+console.log("ATUALIZAÇÂO PELO GITHUB 1.0.1");
 
 const logger = new Logger();
 

@@ -50,6 +50,8 @@ console.log(`[Opa] readyState: ${document.readyState}`);
 
 const BASE_URL = "https://1f3d-200-107-118-1.ngrok-free.app";
 
+// TESTE DE UPDATE
+
 const logger = new Logger();
 
 const INTERVALO_VERIFICACAO_FILA_MS = 16 * 60 * 1000; // 5 minutos

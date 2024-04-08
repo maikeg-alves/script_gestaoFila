@@ -235,16 +235,40 @@ function signalAtendimento(alertas, list) {
 
     elementos.forEach((elemento) => {
       const idAtendimento = elemento.getAttribute(ATENDIMENTO_ATRIBUTO_ID);
+
       const alertaFilter = alertas.find(
         (alerta) =>
           alerta.id_atendimento === idAtendimento &&
           alerta.status != "ocioso" &&
           alerta.status != "ativo"
       );
-      if (alertaFilter) {
+
+      if (alertaFilter.tipo_espera === "cliente_esperando_resposta") {
         elemento.classList.add("pulso");
+      } else if (alertaFilter.tipo_espera === "atendente_esperando_resposta") {
+        const notifDiv = elemento.querySelector("div.notif");
+        if (notifDiv) {
+          const WhatsappIcon = notifDiv.querySelector("i");
+          const AlertUser = notifDiv.querySelector("i.AlertUser");
+
+          if (WhatsappIcon && !AlertUser) {
+            WhatsappIcon.style.display = "none";
+            const novoI = document.createElement("i");
+            novoI.classList.add("AlertUser");
+            notifDiv.appendChild(novoI);
+          }
+        }
       } else {
         elemento.classList.remove("pulso");
+        const notifDiv = elemento.querySelector("div.notif");
+        if (notifDiv) {
+          const WhatsappIcon = notifDiv.querySelector("i");
+          const AlertUser = notifDiv.querySelector("i.AlertUser");
+          if (WhatsappIcon && AlertUser) {
+            WhatsappIcon.style.display = "";
+            AlertUser.remove();
+          }
+        }
       }
     });
   }
@@ -269,10 +293,39 @@ function signalAtendimentoFromCache(list) {
     elementos.forEach((elemento) => {
       const idAtendimento = elemento.getAttribute(DATA_ID);
       const alerta = atendimentosCache[idAtendimento];
-      if (alerta && alerta.status != "ocioso" && alerta.status != "ativo") {
+
+      const filterAlerta =
+        alerta.status != "ocioso" && alerta.status != "ativo";
+
+      if (filterAlerta && alerta.tipo_espera === "cliente_esperando_resposta") {
         elemento.classList.add("pulso");
+      } else if (
+        filterAlerta &&
+        alerta.tipo_espera === "atendente_esperando_resposta"
+      ) {
+        const notifDiv = elemento.querySelector("div.notif");
+        if (notifDiv) {
+          const WhatsappIcon = notifDiv.querySelector("i");
+          const AlertUser = notifDiv.querySelector("i.AlertUser");
+
+          if (WhatsappIcon && !AlertUser) {
+            WhatsappIcon.style.display = "none";
+            const novoI = document.createElement("i");
+            novoI.classList.add("AlertUser");
+            notifDiv.appendChild(novoI);
+          }
+        }
       } else {
         elemento.classList.remove("pulso");
+        const notifDiv = elemento.querySelector("div.notif");
+        if (notifDiv) {
+          const WhatsappIcon = notifDiv.querySelector("i");
+          const AlertUser = notifDiv.querySelector("i.AlertUser");
+          if (WhatsappIcon && AlertUser) {
+            WhatsappIcon.style.display = "";
+            AlertUser.remove();
+          }
+        }
       }
     });
   }
@@ -329,19 +382,44 @@ function addStylePage() {
     const style = document.createElement("style");
     style.textContent = `
                 @keyframes pulso {
-                    0% {
-                        background-color: inherit;
-                    }
-                    50% {
-                        background-color: #431515
-                    }
-                    100% {
-                        background-color: inherit;
-                    }
+                  0% {
+                      background-color: inherit;
+                  }
+                  50% {
+                      background-color: #431515
+                  }
+                  100% {
+                      background-color: inherit;
+                  }
+                }
+
+                @keyframes AlertUserAnimation {
+                  0% {
+                    background-color: inherit;
+                    
+                  }
+                 50% {
+                    background-color: #ff9e00;
+                   
+                   }
+                100% {
+                    background-color: inherit;
+                  } 
                 }
                 
                 .pulso {
-                    animation: pulso 1s infinite; /* Altere a duração conforme necessário */
+                    animation: pulso 1s infinite;
+                }
+
+                .AlertUser {
+                  position: absolute;
+                  background: #ff9e00;
+                  border-radius: 10pc;
+                  color: #ff9700;
+                  width: 13px;
+                  height: 13px;
+                  right: 1px;
+                  animation: AlertUserAnimation 1.5s infinite;
                 }
             `;
     document.body.appendChild(style);

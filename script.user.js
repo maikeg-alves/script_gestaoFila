@@ -204,7 +204,7 @@ async function getAtendimentoById(idsAtendimentos, list) {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "User-Agent": "insomnia/8.6.1",
+      "Content-Type": "Authorization",
     },
     body: JSON.stringify({
       atendimentos: idsAtendimentos,

@@ -8,8 +8,8 @@
 // @icon         data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==
 // @run-at       document-start
 // @grant        none
-// @updateURL    https://1f3d-200-107-118-1.ngrok-free.app/repo/maikeg-alves/script_gestaoFila/script.meta.js?token=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
-// @downloadURL  https://1f3d-200-107-118-1.ngrok-free.app/repo/maikeg-alves/script_gestaoFila/script.user.js?token=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
+// @updateURL    https://b24qfxtdy78n.share.zrok.io/repo/maikeg-alves/script_gestaoFila/script.meta.js?token=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
+// @downloadURL  https://b24qfxtdy78n.share.zrok.io/repo/maikeg-alves/script_gestaoFila/script.user.js?token=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
 // ==/UserScript==
 
 class Logger {

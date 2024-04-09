@@ -8,8 +8,8 @@
 // @icon         data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==
 // @run-at       document-start
 // @grant        none
-// @updateURL    https://b24qfxtdy78n.share.zrok.io/repo/maikeg-alves/script_gestaoFila/script.meta.js?token=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
-// @downloadURL  https://b24qfxtdy78n.share.zrok.io/repo/maikeg-alves/script_gestaoFila/script.user.js?token=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
+// @updateURL    https://18ab-200-107-118-1.ngrok-free.app/repo/maikeg-alves/script_gestaoFila/script.meta.js?token=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
+// @downloadURL  https://18ab-200-107-118-1.ngrok-free.app/repo/maikeg-alves/script_gestaoFila/script.user.js?token=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
 // ==/UserScript==
 
 class Logger {
@@ -48,7 +48,7 @@ class Logger {
 
 console.log(`[Opa] readyState: ${document.readyState}`);
 
-const BASE_URL = "https://b24qfxtdy78n.share.zrok.io";
+const BASE_URL = "https://18ab-200-107-118-1.ngrok-free.app";
 
 // TESTE DE UPDATE
 

@@ -48,7 +48,7 @@ class Logger {
 
 console.log(`[Opa] readyState: ${document.readyState}`);
 
-const BASE_URL = "https://18ab-200-107-118-1.ngrok-free.app";
+const BASE_URL = "https://api.viafiber.duckdns.org";
 
 // TESTE DE UPDATE
 

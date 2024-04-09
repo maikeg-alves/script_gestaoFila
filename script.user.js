@@ -48,7 +48,7 @@ class Logger {
 
 console.log(`[Opa] readyState: ${document.readyState}`);
 
-const BASE_URL = "https://1f3d-200-107-118-1.ngrok-free.app";
+const BASE_URL = "https://b24qfxtdy78n.share.zrok.io";
 
 // TESTE DE UPDATE
 

@@ -8,8 +8,8 @@
 // @icon         data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==
 // @run-at       document-start
 // @grant        none
-// @updateURL    https://api.viafiber.duckdns.org/repo/maikeg-alves/script_gestaoFila/script.meta.js?token=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
-// @downloadURL  https://api.viafiber.duckdns.org/repo/maikeg-alves/script_gestaoFila/script.user.js?token=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
+// @updateURL
+// @downloadURL
 // ==/UserScript==
 
 class Logger {

@@ -44,7 +44,7 @@ console.log(`[Opa] readyState: ${document.readyState}`);
 
 const BASE_URL = "https://api.viafiber.duckdns.org";
 
-const DEBUG_LOGS = true;
+const DEBUG_LOGS = false;
 
 const logger = new Logger();
 

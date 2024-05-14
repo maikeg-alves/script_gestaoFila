@@ -8,8 +8,8 @@
 // @icon         data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==
 // @run-at       document-start
 // @grant        none
-// @updateURL    https://18ab-200-107-118-1.ngrok-free.app/repo/maikeg-alves/script_gestaoFila/script.meta.js?token=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
-// @downloadURL  https://18ab-200-107-118-1.ngrok-free.app/repo/maikeg-alves/script_gestaoFila/script.user.js?token=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
+// @updateURL    https://api.viafiber.duckdns.org/repo/maikeg-alves/script_gestaoFila/script.meta.js?token=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
+// @downloadURL  https://api.viafiber.duckdns.org/repo/maikeg-alves/script_gestaoFila/script.user.js?token=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
 // ==/UserScript==
 
 class Logger {
@@ -44,7 +44,7 @@ console.log(`[Opa] readyState: ${document.readyState}`);
 
 const BASE_URL = "https://api.viafiber.duckdns.org";
 
-const DEBUG_LOGS = true; // habilita e desabilita os logs
+const DEBUG_LOGS = false;
 
 const logger = new Logger();
 

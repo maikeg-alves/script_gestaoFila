@@ -8,8 +8,8 @@
 // @icon         data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==
 // @run-at       document-start
 // @grant        none
-// @updateURL    https://f187-200-107-118-1.ngrok-free.app/repo/maikeg-alves/script_gestaoFila/script.meta.js?token=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
-// @downloadURL  https://f187-200-107-118-1.ngrok-free.app/repo/maikeg-alves/script_gestaoFila/script.user.js?token=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
+// @updateURL    https://api.viafiber.duckdns.org/repo/maikeg-alves/script_gestaoFila/script.meta.js?token=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
+// @downloadURL  https://api.viafiber.duckdns.org/repo/maikeg-alves/script_gestaoFila/script.user.js?token=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
 // ==/UserScript==
 
 class Logger {
@@ -20,12 +20,6 @@ class Logger {
   log(message) {
     if (this.logsAtivos) {
       console.log(`[LOG] ${message}`);
-    }
-  }
-
-  logError(message) {
-    if (this.logsAtivos) {
-      console.error(`[ERROR] ${message}`);
     }
   }
 
@@ -48,11 +42,17 @@ class Logger {
 
 console.log(`[Opa] readyState: ${document.readyState}`);
 
-const BASE_URL = "https://1f3d-200-107-118-1.ngrok-free.app";
+const BASE_URL = "https://api.viafiber.duckdns.org";
+
+const DEBUG_LOGS = false;
 
 const logger = new Logger();
 
 const INTERVALO_VERIFICACAO_FILA_MS = 16 * 60 * 1000; // 5 minutos
+
+let intervaloVerificacao = 1500;
+
+let consultandoAtendimentos = false;
 
 const TAMANHO_LOTES = 10; // quantidade de chamadas na api por minutos
 
@@ -61,10 +61,6 @@ const atendimentosCache = {}; // atedndmentos armazenados localmente
 const atendimentosObservados = []; // atendimentos que foram abertos
 
 const atendimentosComErro = []; // atendimentos que deram erro ao buscar
-
-const LOGS_STATUS = true; // desabilitar os LOGS
-
-let consultandoAtendimentos = false;
 
 const tempoAtual = new Date();
 const TEMPOLIMITE = 15;
@@ -85,7 +81,7 @@ const ATENDIMENTO_ATRIBUTO_ID = "[data-id]";
 
 const DATA_ID = "data-id";
 
-logger.desativarLogs(LOGS_STATUS);
+logger.desativarLogs(DEBUG_LOGS);
 
 (() => {
   "use strict";
@@ -95,7 +91,7 @@ logger.desativarLogs(LOGS_STATUS);
 
   runScript();
 
-  setInterval(runScript, 500);
+  setInterval(runScript, intervaloVerificacao);
 
   atualizarCachePeriodicamente();
 
@@ -115,9 +111,19 @@ async function runScript() {
 
   observeContainer(CONTAINER_SELECTOR)
     .then(async ({ list, dialog }) => {
+      if (!list || !dialog) {
+        logger.error(
+          "[observeContainer] Erro: Elementos da observação não encontrados."
+        );
+        return;
+      }
+
       if (list && dialog) {
         for (const id_atendimento of atendimentosObservados) {
-          logger.log("Atendimento observado:", id_atendimento);
+          logger.log(
+            "[observeContainer] Atendimento observado:",
+            id_atendimento
+          );
           await verificarAtendimentoAtivo(dialog, id_atendimento, list);
         }
 
@@ -136,7 +142,19 @@ async function runScript() {
       }
     })
     .catch((error) => {
-      logger.error("Erro ao observar o contêiner:", error);
+      if (error instanceof DOMException) {
+        logger.error(
+          "[observeContainer] Erro ao selecionar elemento:",
+          error.message
+        );
+      } else if (error instanceof TypeError) {
+        logger.error(
+          "[observeContainer]  Erro ao acessar propriedade:",
+          error.message
+        );
+      } else {
+        logger.error("[observeContainer] Erro desconhecido:", error.message);
+      }
     });
 }
 
@@ -172,18 +190,21 @@ async function getListClintes(list) {
     );
 
     if (atendimentosPendentes.length > 0) {
-      logger.log(`Atendimentos pendentes: ${atendimentosPendentes.length}`);
+      logger.log(
+        `[getListClintes] : Atendimentos pendentes: ${atendimentosPendentes.length}`
+      );
 
       if (atendimentosPendentes.length > 30) {
-        await processarAtendimentos(atendimentosPendentes, list);
-      } else {
+        await processarAtendimentosLotes(atendimentosPendentes, list);
+      } else if (atendimentosPendentes.length < 30) {
         await getAtendimentoById(atendimentosPendentes, list);
       }
     } else {
-      signalAtendimentoFromCache(list);
       logger.log(
         `Atendimentos em cache: ${Object.keys(atendimentosCache).length}`
       );
+
+      signalAtendimentoFromCache(list);
     }
   } else {
     logger.error(
@@ -202,7 +223,6 @@ async function getAtendimentoById(idsAtendimentos, list) {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "User-Agent": "insomnia/8.6.1",
     },
     body: JSON.stringify({
       atendimentos: idsAtendimentos,
@@ -214,13 +234,29 @@ async function getAtendimentoById(idsAtendimentos, list) {
   await fetch(`${BASE_URL}/atendimento/status`, options)
     .then((response) => response.json())
     .then((alertas) => {
-      logger.log("Consulta realizada com sucesso.");
+      if (alertas.length) {
+        logger.log("[Busca Atendimento] Consulta realizada com sucesso.");
+      }
+
       updateCache(alertas);
       signalAtendimento(alertas, list);
     })
-    .catch((error) =>
-      logger.error("Erro ao consultar atendimentos:", error.message)
-    )
+    .catch((error) => {
+      if (error instanceof NetworkError) {
+        logger.error("[Busca Atendimento] Erro de rede:", error.message);
+      } else if (error instanceof SyntaxError) {
+        logger.error(
+          "[Busca Atendimento] Erro ao decodificar JSON:",
+          error.message
+        );
+      } else {
+        logger.error(
+          "[Busca Atendimento] Erro desconhecido ao consultar atendimentos: " +
+            idsAtendimentos,
+          error.message
+        );
+      }
+    })
     .finally(() => {
       consultandoAtendimentos = false;
     });
@@ -235,16 +271,40 @@ function signalAtendimento(alertas, list) {
 
     elementos.forEach((elemento) => {
       const idAtendimento = elemento.getAttribute(ATENDIMENTO_ATRIBUTO_ID);
+
       const alertaFilter = alertas.find(
         (alerta) =>
           alerta.id_atendimento === idAtendimento &&
           alerta.status != "ocioso" &&
           alerta.status != "ativo"
       );
-      if (alertaFilter) {
+
+      if (alertaFilter.tipo_espera === "cliente_esperando_resposta") {
         elemento.classList.add("pulso");
+      } else if (alertaFilter.tipo_espera === "atendente_esperando_resposta") {
+        const notifDiv = elemento.querySelector("div.notif");
+        if (notifDiv) {
+          const WhatsappIcon = notifDiv.querySelector("i");
+          const AlertUser = notifDiv.querySelector("i.AlertUser");
+
+          if (WhatsappIcon && !AlertUser) {
+            WhatsappIcon.style.display = "none";
+            const novoI = document.createElement("i");
+            novoI.classList.add("AlertUser");
+            notifDiv.appendChild(novoI);
+          }
+        }
       } else {
         elemento.classList.remove("pulso");
+        const notifDiv = elemento.querySelector("div.notif");
+        if (notifDiv) {
+          const WhatsappIcon = notifDiv.querySelector("i");
+          const AlertUser = notifDiv.querySelector("i.AlertUser");
+          if (WhatsappIcon && AlertUser) {
+            WhatsappIcon.style.display = "";
+            AlertUser.remove();
+          }
+        }
       }
     });
   }
@@ -269,10 +329,39 @@ function signalAtendimentoFromCache(list) {
     elementos.forEach((elemento) => {
       const idAtendimento = elemento.getAttribute(DATA_ID);
       const alerta = atendimentosCache[idAtendimento];
-      if (alerta && alerta.status != "ocioso" && alerta.status != "ativo") {
+
+      const filterAlerta =
+        alerta.status != "ocioso" && alerta.status != "ativo";
+
+      if (filterAlerta && alerta.tipo_espera === "cliente_esperando_resposta") {
         elemento.classList.add("pulso");
+      } else if (
+        filterAlerta &&
+        alerta.tipo_espera === "atendente_esperando_resposta"
+      ) {
+        const notifDiv = elemento.querySelector("div.notif");
+        if (notifDiv) {
+          const WhatsappIcon = notifDiv.querySelector("i");
+          const AlertUser = notifDiv.querySelector("i.AlertUser");
+
+          if (WhatsappIcon && !AlertUser) {
+            WhatsappIcon.style.display = "none";
+            const novoI = document.createElement("i");
+            novoI.classList.add("AlertUser");
+            notifDiv.appendChild(novoI);
+          }
+        }
       } else {
         elemento.classList.remove("pulso");
+        const notifDiv = elemento.querySelector("div.notif");
+        if (notifDiv) {
+          const WhatsappIcon = notifDiv.querySelector("i");
+          const AlertUser = notifDiv.querySelector("i.AlertUser");
+          if (WhatsappIcon && AlertUser) {
+            WhatsappIcon.style.display = "";
+            AlertUser.remove();
+          }
+        }
       }
     });
   }
@@ -321,39 +410,9 @@ function observeContainer(container) {
     checkContainer();
   });
 }
-
-// adiciona o css com efeito de pulso na pagina
-function addStylePage() {
-  if (!document.body.classList.contains("style-added")) {
-    // Adiciona estilo CSS diretamente ao corpo da página
-    const style = document.createElement("style");
-    style.textContent = `
-                @keyframes pulso {
-                    0% {
-                        background-color: inherit;
-                    }
-                    50% {
-                        background-color: #431515
-                    }
-                    100% {
-                        background-color: inherit;
-                    }
-                }
-                
-                .pulso {
-                    animation: pulso 1s infinite; /* Altere a duração conforme necessário */
-                }
-            `;
-    document.body.appendChild(style);
-
-    // Adiciona uma classe ao corpo da página para indicar que o estilo foi adicionado
-    document.body.classList.add("style-added");
-  }
-}
-
 // remove o atendimento da cache para verificar se existe o mesmo está ativo
 async function verificarAtendimentoAtivo(dialog, id_atendimento, list) {
-  logger.log("Verificando Atendimento.");
+  logger.log("[verificarAtendimentoAtivo] Verificando Atendimento.");
 
   const chatAberto = dialog.querySelector(
     `div.dialog_panel[data-id="${id_atendimento}"]`
@@ -394,24 +453,37 @@ async function verificarAtendimentoAtivo(dialog, id_atendimento, list) {
             }
 
             delete atendimentosObservados[id_atendimento];
-            await getAtendimentoById([id_atendimento], list);
+
+            if ([id_atendimento].length) {
+              await getAtendimentoById([id_atendimento], list);
+            } else {
+              logger.error(
+                "[verificarAtendimentoAtivo] idsAtendimentos não é um array de ids"
+              );
+            }
           }
         } else {
-          logger.log("Atendimento ativo.");
+          logger.log("[verificarAtendimentoAtivo] Atendimento ativo.");
           if (atendimentoCache && atendimentoCache.status === "pendente") {
             delete atendimentosCache[id_atendimento];
-            await getAtendimentoById([id_atendimento], list);
+            if ([id_atendimento].length) {
+              await getAtendimentoById([id_atendimento], list);
+            } else {
+              logger.error(
+                "[verificarAtendimentoAtivo] idsAtendimentos não é um array de ids"
+              );
+            }
           }
         }
       }
     }
   } else {
-    logger.log("Atendimento inativo encontrado para o ID:", id_atendimento);
+    logger.log(`Atendimento inativo encontrado para o ID: ${id_atendimento}`);
   }
 }
 
 // lida com a chamada dos atendimentos em lotes
-async function processarAtendimentos(atendimentosIds, list) {
+async function processarAtendimentosLotes(atendimentosIds, list) {
   const batchSize = Number(TAMANHO_LOTES);
   let start = 0;
 
@@ -425,17 +497,27 @@ async function processarAtendimentos(atendimentosIds, list) {
     await Promise.all(
       batchIds.map(async (idAtendimento) => {
         try {
-          await getAtendimentoById([idAtendimento], list);
+          if ([idAtendimento].length) {
+            await getAtendimentoById([idAtendimento], list);
+          } else {
+            logger.error(
+              "[processarAtendimentosLotes] idsAtendimentos não é um array de ids"
+            );
+          }
         } catch (error) {
           atendimentosComErro.push(idAtendimento);
         }
       })
     );
 
+    intervaloVerificacao += 500;
+
     start += batchSize;
   }
 
   await retryFailedAtendimentos(list);
+
+  intervaloVerificacao = 1500;
 
   logger.debug("Processamento de atendimentos concluído.");
 }
@@ -454,8 +536,17 @@ async function retryFailedAtendimentos(list) {
   // Processar novamente os atendimentos com erro
   for (const idAtendimento of atendimentosComErro) {
     try {
-      await getAtendimentoById([idAtendimento], list);
+      intervaloVerificacao += 500;
+
+      if ([idAtendimento].length) {
+        await getAtendimentoById([idAtendimento], list);
+      } else {
+        logger.error(
+          "[retryFailedAtendimentos] idsAtendimentos não é um array de ids"
+        );
+      }
       const index = atendimentosComErro.indexOf(idAtendimento);
+
       if (index !== -1) {
         atendimentosComErro.splice(index, 1);
       }
@@ -468,10 +559,66 @@ async function retryFailedAtendimentos(list) {
 
   logger.log("Tentativa de reprocessamento de atendimentos concluída.");
 
+  intervaloVerificacao = 1500;
+
   if (atendimentosComErro.length > 0) {
     logger.error("Atendimentos com erro:");
     for (const id of atendimentosComErro) {
       logger.error(`> ${id}`);
     }
+  }
+}
+
+// adiciona o css com efeito de pulso na pagina
+function addStylePage() {
+  if (!document.body.classList.contains("style-added")) {
+    // Adiciona estilo CSS diretamente ao corpo da página
+    const style = document.createElement("style");
+    style.textContent = `
+                @keyframes pulso {
+                  0% {
+                      background-color: inherit;
+                  }
+                  50% {
+                      background-color: #431515
+                  }
+                  100% {
+                      background-color: inherit;
+                  }
+                }
+
+                @keyframes AlertUserAnimation {
+                  0% {
+                    background-color: inherit;
+                    
+                  }
+                 50% {
+                    background-color: #ff9e00;
+                   
+                   }
+                100% {
+                    background-color: inherit;
+                  } 
+                }
+                
+                .pulso {
+                    animation: pulso 1s infinite;
+                }
+
+                .AlertUser {
+                  position: absolute;
+                  background: #ff9e00;
+                  border-radius: 10pc;
+                  color: #ff9700;
+                  width: 13px;
+                  height: 13px;
+                  right: 1px;
+                  animation: AlertUserAnimation 1.5s infinite;
+                }
+            `;
+    document.body.appendChild(style);
+
+    // Adiciona uma classe ao corpo da página para indicar que o estilo foi adicionado
+    document.body.classList.add("style-added");
   }
 }

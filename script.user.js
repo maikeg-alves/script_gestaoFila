@@ -8,8 +8,8 @@
 // @icon         data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==
 // @run-at       document-start
 // @grant        none
-// @updateURL
-// @downloadURL
+// @updateURL    https://raw.githubusercontent.com/maikeg-alves/script_gestaoFila/main/script.meta.js
+// @downloadURL  https://github.com/maikeg-alves/script_gestaoFila/releases/latest/download/script.user.js
 // ==/UserScript==
 
 class Logger {
@@ -44,7 +44,7 @@ console.log(`[Opa] readyState: ${document.readyState}`);
 
 const BASE_URL = "https://api.viafiber.duckdns.org";
 
-const DEBUG_LOGS = false;
+const DEBUG_LOGS = true;
 
 const logger = new Logger();
 

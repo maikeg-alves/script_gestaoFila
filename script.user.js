@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Script Gestão de Fila
 // @namespace    http://tampermonkey.net/
-// @version      1.0.0
+// @version      2.1.0
 // @description  Script de gestão de filas, opa - via fiber
 // @author       Maicon Gabriel Alves
 // @match        https://opasuite.viafiberinternet.com.br/*
